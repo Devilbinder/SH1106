@@ -475,10 +475,11 @@ void Adafruit_SH1106::display(void) {
 		sh1106_command(SH1106_SET_PAGE_ADDRESS + page);
         sh1106_command(0x02); // low column start address
         sh1106_command(0x10); // high column start address
-        for (int pixel = 0; pixel < SH1106_LCDWIDTH; pixel++)
-        {
-			if (sid != -1)
-			{
+       
+		if (sid != -1)
+		{
+			 for (int pixel = 0; pixel < SH1106_LCDWIDTH; pixel++)
+			 {	
 				// SPI
 				#ifdef HAVE_PORTREG
 					*csport |= cspinmask;
@@ -497,103 +498,38 @@ void Adafruit_SH1106::display(void) {
 				#else
 					digitalWrite(cs, HIGH);
 				#endif
-			}
-			else
-			{
-				// save I2C bitrate
-				#ifdef TWBR
-					uint8_t twbrbackup = TWBR;
-					TWBR = 12; // upgrade to 400KHz!
-				#endif
-
-				//Serial.println(TWBR, DEC);
-				//Serial.println(TWSR & 0x3, DEC);
-
-				// I2C
-				for (uint16_t i=0; i<(SH1106_LCDWIDTH*SH1106_LCDHEIGHT/8); i++) {
-				  // send a bunch of data in one xmission
-				  Wire.beginTransmission(_i2caddr);
-				  WIRE_WRITE(0x40);
-				  for (uint8_t x=0; x<16; x++) {
-					WIRE_WRITE(buffer[i]);
-					i++;
-				  }
-				  i--;
-				  Wire.endTransmission();
-				}
-				#ifdef TWBR
-					TWBR = twbrbackup;
-				#endif
+				
 			}
 		}
+		else
+		{
+				// save I2C bitrate
+// save I2C bitrate
+			#ifdef TWBR
+				uint8_t twbrbackup = TWBR;
+				TWBR = 12; // upgrade to 400KHz!
+			#endif
+
+			//Serial.println(TWBR, DEC);
+			//Serial.println(TWSR & 0x3, DEC);
+
+			// I2C
+			for (uint16_t i=0; i<8; i++) {
+				// send a bunch of data in one xmission
+				Wire.beginTransmission(_i2caddr);
+				WIRE_WRITE(0x40);
+				for (uint8_t x=0; x<16; x++) {
+					WIRE_WRITE(buffer[k]);
+					k++;
+				}
+				  
+				Wire.endTransmission();
+			}
+			#ifdef TWBR
+				TWBR = twbrbackup;
+			#endif
+		}
 	}
-
-/*  sh1106_command(SH1106_COLUMNADDR);
-  sh1106_command(0);   // Column start address (0 = reset)
-  sh1106_command(SH1106_LCDWIDTH-1); // Column end address (127 = reset)
-
-  sh1106_command(SH1106_PAGEADDR);
-  sh1106_command(0); // Page start address (0 = reset)
-  #if SH1106_LCDHEIGHT == 64
-    sh1106_command(7); // Page end address
-  #endif
-  #if SH1106_LCDHEIGHT == 32
-    sh1106_command(3); // Page end address
-  #endif
-  #if SH1106_LCDHEIGHT == 16
-    sh1106_command(1); // Page end address
-  #endif
-
-  if (sid != -1)
-  {
-    // SPI
-#ifdef HAVE_PORTREG
-    *csport |= cspinmask;
-    *dcport |= dcpinmask;
-    *csport &= ~cspinmask;
-#else
-    digitalWrite(cs, HIGH);
-    digitalWrite(dc, HIGH);
-    digitalWrite(cs, LOW);
-#endif
-
-    for (uint16_t i=0; i<(SH1106_LCDWIDTH*SH1106_LCDHEIGHT/8); i++) {
-      fastSPIwrite(buffer[i]);
-    }
-#ifdef HAVE_PORTREG
-    *csport |= cspinmask;
-#else
-    digitalWrite(cs, HIGH);
-#endif
-  }
-  else
-  {
-    // save I2C bitrate
-#ifdef TWBR
-    uint8_t twbrbackup = TWBR;
-    TWBR = 12; // upgrade to 400KHz!
-#endif
-
-    //Serial.println(TWBR, DEC);
-    //Serial.println(TWSR & 0x3, DEC);
-
-    // I2C
-    for (uint16_t i=0; i<(SH1106_LCDWIDTH*SH1106_LCDHEIGHT/8); i++) {
-      // send a bunch of data in one xmission
-      Wire.beginTransmission(_i2caddr);
-      WIRE_WRITE(0x40);
-      for (uint8_t x=0; x<16; x++) {
-        WIRE_WRITE(buffer[i]);
-        i++;
-      }
-      i--;
-      Wire.endTransmission();
-    }
-#ifdef TWBR
-    TWBR = twbrbackup;
-#endif
-  }
-*/
 }
 
 // clear everything

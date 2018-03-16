@@ -1,3 +1,4 @@
+This library has been edited to work with the SH1106 drivers with I2C
 # SH1106
 <!-- START COMPATIBILITY TABLE -->
 
